@@ -6,75 +6,120 @@
 /*   By: mgamil <mgamil@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/17 16:18:41 by mgamil            #+#    #+#             */
-/*   Updated: 2022/12/19 06:20:06 by mgamil           ###   ########.fr       */
+/*   Updated: 2022/12/21 06:06:34 by mgamil           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
 
-ssize_t	tm_gimme(struct timeval start)
+long	gettime2(struct timeval start)
 {
-	struct timeval	end;
-
-	if (gettimeofday(&end, NULL) == -1)
-		return (0);
-	return ((1e3 * ((&end)->tv_sec - (&start)->tv_sec)) + (1e-3
-			* ((&end)->tv_usec - (&start)->tv_usec)));
+	gettimeofday(&start, NULL);
+	return (1000 * start.tv_sec + start.tv_usec / 1000);
 }
 
-void	printtime(void)
+void	*checker(void *arg)
 {
-	struct timeval	clock;
+	t_dead *dead;
+	int i;
 
-	if (gettimeofday(&clock, NULL) == -1)
-		return ;
-	printf("[%s%lld%s]", BMAGENTA, (clock.tv_sec * 1000LL + clock.tv_usec
-				/ 1000), RESET);
+	dead = (t_dead *)arg;
+	while (1)
+	{
+		i = -1;
+		while (++i < dead -> data -> nbphils)
+		{
+			if (gettime2(dead -> data -> phil[i].var) - dead -> data -> global >= dead -> data -> timetodie)
+			{
+				printf("Phil[%i] is dead\n", i);
+				exit(1);
+			}
+		}
+	}
+	return (NULL);
 }
 
-// int	checkfork(t_all *all)
-// {
-// 	if (all->data->nbphils % 2 == 0)
-// 		return (1);
-// 	else
-// 		return (2);
-// }
+long	gettime(void)
+{
+	struct timeval	start;
+
+	gettimeofday(&start, NULL);
+	return (1000 * start.tv_sec + start.tv_usec / 1000);
+}
+
+int	is_dead(t_phil *phil)
+{
+	pthread_mutex_lock(& phil -> data -> shield);
+	if (phil -> data -> death)
+		return (1);
+	pthread_mutex_unlock(& phil -> data -> shield);
+	return (0);
+}
+
+
+int	show(t_phil *phil, char *what)
+{
+	pthread_mutex_lock(&phil -> data -> print);
+	printf("[%li] Phil[%i] %s%s%s\n", gettime() - phil -> data -> global, phil -> index + 1,
+				color(what), what, RESET);
+	pthread_mutex_unlock(&phil -> data -> print);
+	return (0);
+}
+
+int	starteating(t_phil *phil)
+{
+	show(phil, "is eating");
+	if (!(--phil -> nbmaxeat))
+	{
+		show(phil, "sayer mon gars");
+		//unlock mutexes;
+		return (1);
+	}
+	pthread_mutex_lock(&phil -> data -> shield);
+	if(gettimeofday(& phil -> var, NULL))
+		return (1);
+	printf("%i avant ->>>> %li\n", phil -> index, gettime2(phil->var) - phil -> data -> global);
+	usleep(phil -> timetoeat * 1000);
+	printf("%i apres ->>>> %li\n", phil -> index, gettime2(phil->var) - phil -> data -> global);
+	show(phil, "vient de mettre a jour son temps");
+	pthread_mutex_unlock(& phil -> data -> shield);
+	pthread_mutex_unlock(phil -> leftfork);
+	pthread_mutex_unlock(phil -> rightfork);
+	return (0);
+}
+
+int	startsleeping(t_phil *phil)
+{
+	show(phil, "is sleeping");
+	usleep(phil -> timetosleep * 1000);
+	show(phil, "is thinking");
+	return (0);
+}
 
 void	*routine(void *arg)
 {
-	t_all	*all;
+	t_phil	*phil;
 
-	all = (t_all *)arg;
-	pthread_mutex_lock(&all->data->print);
-			printtime();
-	printf("Philo n°%i\n", all->phil->index);
-	// if (all->phil->)
-	// if (checkfork(all) == 2)
-	// {
-	// 	if ((all->phil->index++ % 2) > 0)
-	// 	{
-	// 		printf("Philo n°%i has taken a fork\n", all->phil->index);
-	// 	}
-	// }
-		all->phil->index++;
-	pthread_mutex_unlock(&all->data->print);
-	sleep(1);
-	pthread_mutex_lock(&all->data->print);
-	printtime();
-	printf("Ending threads\n");
-	pthread_mutex_unlock(&all->data->print);
+	
+	phil = (t_phil *)arg;
+	while (1)
+	{
+		if(takefork(phil))
+			break ;
+		if (starteating(phil))
+			break ;
+		if (startsleeping(phil))
+			break ;
+	}
+	ft_printf("ok many\n");
 	return (NULL);
 }
 
 int	main(int ac, char **av)
 {
-	t_data	data;
-	t_phil	phil;
 	t_all	all;
 
-	all.data = &data;
-	all.phil = &phil;
-	init(&all, ac, av);
-	print_struct(all);
-	init_philos(&all, &data, &phil);
+	memset(&all, 0, sizeof(t_all));
+	if(init_all(&all, ac, av))
+		return (1);
 }

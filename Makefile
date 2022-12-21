@@ -6,7 +6,7 @@ DIR_SRCS		=	srcs/
 
 DIR_OBJS		=	objs
 
-SRCS_NAMES		=	main.c	init.c	misc.c
+SRCS_NAMES		=	main.c	init.c	misc.c	fork.c
 
 OBJS_NAMES		=	${SRCS_NAMES:.c=.o}
 
