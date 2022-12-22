@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philosophers.h                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mgamil <mgamil@student.42.fr>              +#+  +:+       +#+        */
+/*   By: mgamil <mgamil@42.student.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/17 16:21:20 by mgamil            #+#    #+#             */
-/*   Updated: 2022/12/22 00:57:54 by mgamil           ###   ########.fr       */
+/*   Updated: 2022/12/22 09:17:08 by mgamil           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,6 @@ int						takefork(t_phil *phil);
 /*	TIME.C			*/
 long					gettime(void);
 long					convertoms(struct timeval var);
-void					usleep_(long int duration, t_phil *phil);
+int					usleep_(long int duration, t_phil *phil);
 
 #endif

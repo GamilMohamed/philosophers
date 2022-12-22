@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   time.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mgamil <mgamil@student.42.fr>              +#+  +:+       +#+        */
+/*   By: mgamil <mgamil@42.student.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/21 23:46:13 by mgamil            #+#    #+#             */
-/*   Updated: 2022/12/22 04:43:59 by mgamil           ###   ########.fr       */
+/*   Updated: 2022/12/22 09:17:32 by mgamil           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ long	convertoms(struct timeval var)
 	return (var.tv_sec * 1000 + var.tv_usec / 1000);
 }
 
-void	usleep_(long int duration, t_phil *phil)
+int	usleep_(long int duration, t_phil *phil)
 {
 	long int	start;
 	long int	current;
@@ -34,7 +34,7 @@ void	usleep_(long int duration, t_phil *phil)
 	start = -1;
 	start = gettime();
 	if (start == -1)
-		return ;
+		return (1);
 	else
 	{
 		while (1)
@@ -47,7 +47,8 @@ void	usleep_(long int duration, t_phil *phil)
 			else
 				usleep((duration - current) / 10);
 			if (is_dead(phil))
-				break ;
+				return (1);
 		}
 	}
+	return (0);
 }
