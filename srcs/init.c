@@ -6,7 +6,7 @@
 /*   By: mgamil <mgamil@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/18 19:44:30 by mgamil            #+#    #+#             */
-/*   Updated: 2022/12/21 05:52:32 by mgamil           ###   ########.fr       */
+/*   Updated: 2022/12/22 05:41:24 by mgamil           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,10 +42,13 @@ static int	init_philos(t_all *all)
 	if (!all->m_nbforks)
 		return (1);
 	while (++i < all->nbphils)
-		if (pthread_mutex_init(all->m_nbforks, NULL))
+		if (pthread_mutex_init(& all->m_nbforks[i], NULL))
 			return (ft_error(all, "init.c (init_philos)", i, 1));
-	if (pthread_mutex_init(&all->print, NULL))
-		return (ft_error(all, "init.c (init_philos)", -1, 0));
+	all->checker = malloc(sizeof(pthread_mutex_t) * all->nbphils);
+	i = -1;
+	while (++i < all->nbphils)
+		if (pthread_mutex_init(all->checker, NULL))
+			return (ft_error(all, "init.c (init_philos)", -1, 0));
 	if (pthread_mutex_init(&all->shield, NULL))
 		return (ft_error(all, "init.c (init_philos)", -1, 1));
 	return (0);
@@ -57,6 +60,7 @@ static int	init_tabstruct(t_all *all)
 
 	i = -1;
 	all->phil = malloc(sizeof(t_phil) * all->nbphils);
+	memset(all->phil, 0, sizeof(t_phil) * all ->nbphils);
 	if (!all->phil)
 		return (ft_error(all, "init.c (init_tabstruct)", -1, 2));
 	i = -1;
@@ -84,21 +88,28 @@ static int	init_threads(t_all *all, t_phil *phil)
 	int		i;
 	t_dead	dead;
 
+	memset(&dead, 0, sizeof(t_dead));
 	dead.data = all;
 	dead.phil = phil;
 	i = -1;
+	while (++i < all->nbphils)
+		pthread_mutex_init(&phil->data->checker[i], NULL);
+	i = -1;
+	if (pthread_mutex_init(& dead.protector, NULL))
+		return (ft_error(all, "protector (init_threads)", -1, 1));
 	all->global = gettime();
 	if (pthread_create(&dead.stalker, NULL, &checker, &dead) != 0)
-		return (ft_error(all, "init.c (init_threads)", -1, 3));
+		return (ft_error(all, "stalker (init_threads)", -1, 3));
 	while (++i < all->nbphils)
 		if (pthread_create(&phil[i].phils, NULL, &routine, &phil[i]) != 0)
-			return (ft_error(all, "init.c (init_threads)", -1, 3));
+			return (ft_error(all, "create phil (init_threads)", -1, 3));
 	i = -1;
 	while (++i < all->nbphils)
 		if (pthread_join(phil[i].phils, NULL) != 0)
-			return (ft_threadserror(all, "init.c (init_threads)", i) != 0);
+			return (ft_threadserror(all, "join (init_threads)", i) != 0);
 	if (pthread_join(dead.stalker, NULL) != 0)
-		return (ft_threadserror(all, "init.c (init_threads)", i) != 0);
+		return (ft_threadserror(all, "join2 (init_threads)", i) != 0);
+	
 	return (0);
 }
 

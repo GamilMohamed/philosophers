@@ -6,92 +6,91 @@
 /*   By: mgamil <mgamil@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/17 16:18:41 by mgamil            #+#    #+#             */
-/*   Updated: 2022/12/21 06:06:34 by mgamil           ###   ########.fr       */
+/*   Updated: 2022/12/22 05:43:07 by mgamil           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
 
-long	gettime2(struct timeval start)
-{
-	gettimeofday(&start, NULL);
-	return (1000 * start.tv_sec + start.tv_usec / 1000);
-}
-
 void	*checker(void *arg)
 {
-	t_dead *dead;
-	int i;
+	t_dead	*dead;
+	int		i;
+	long	time;
 
 	dead = (t_dead *)arg;
 	while (1)
 	{
 		i = -1;
-		while (++i < dead -> data -> nbphils)
+		while (++i < dead->data->nbphils)
 		{
-			if (gettime2(dead -> data -> phil[i].var) - dead -> data -> global >= dead -> data -> timetodie)
+			time = gettime() - convertoms(dead->data->phil[i].var);
+			pthread_mutex_unlock(&dead->data->checker[i]);
+			if (time > dead->data->timetodie)
 			{
-				printf("Phil[%i] is dead\n", i);
-				exit(1);
+				pthread_mutex_lock(&dead->data->print);
+				printf("%s[%li] Phil[%i] is dead%s\n", RED, gettime()
+						- dead->data->global, i + 1, RESET);
+				pthread_mutex_unlock(&dead->data->print);
+				pthread_mutex_lock(&dead->data->checker[i]);
+				dead->data->death = 1;
+				pthread_mutex_unlock(&dead->data->checker[i]);
+				return (NULL);
 			}
 		}
 	}
 	return (NULL);
 }
 
-long	gettime(void)
-{
-	struct timeval	start;
-
-	gettimeofday(&start, NULL);
-	return (1000 * start.tv_sec + start.tv_usec / 1000);
-}
-
 int	is_dead(t_phil *phil)
 {
-	pthread_mutex_lock(& phil -> data -> shield);
-	if (phil -> data -> death)
-		return (1);
-	pthread_mutex_unlock(& phil -> data -> shield);
-	return (0);
-}
+	int	ret;
 
+	pthread_mutex_lock(&phil->data->checker[phil->index]);
+	ret = 0;
+	if (phil->data->death)
+		ret = 1;
+	pthread_mutex_unlock(&phil->data->checker[phil->index]);
+	return (ret);
+}
 
 int	show(t_phil *phil, char *what)
 {
-	pthread_mutex_lock(&phil -> data -> print);
-	printf("[%li] Phil[%i] %s%s%s\n", gettime() - phil -> data -> global, phil -> index + 1,
-				color(what), what, RESET);
-	pthread_mutex_unlock(&phil -> data -> print);
-	return (0);
+	int	ret;
+
+	ret = 0;
+	pthread_mutex_lock(&phil->data->print);
+	if (!is_dead(phil))
+		printf("[%li] Phil[%i] %s%s%s\n", gettime() - phil->data->global,
+				phil->index + 1, color(what), what, RESET);
+	else
+		ret = -1;
+	pthread_mutex_unlock(&phil->data->print);
+	return (ret);
 }
 
 int	starteating(t_phil *phil)
 {
-	show(phil, "is eating");
-	if (!(--phil -> nbmaxeat))
-	{
-		show(phil, "sayer mon gars");
-		//unlock mutexes;
+	int	ret;
+
+	ret = 0;
+	pthread_mutex_lock(&phil->data->shield);
+	if (gettimeofday(&phil->var, NULL))
 		return (1);
-	}
-	pthread_mutex_lock(&phil -> data -> shield);
-	if(gettimeofday(& phil -> var, NULL))
+	pthread_mutex_unlock(&phil->data->shield);
+	if (show(phil, "is eating") == -1)
 		return (1);
-	printf("%i avant ->>>> %li\n", phil -> index, gettime2(phil->var) - phil -> data -> global);
-	usleep(phil -> timetoeat * 1000);
-	printf("%i apres ->>>> %li\n", phil -> index, gettime2(phil->var) - phil -> data -> global);
-	show(phil, "vient de mettre a jour son temps");
-	pthread_mutex_unlock(& phil -> data -> shield);
-	pthread_mutex_unlock(phil -> leftfork);
-	pthread_mutex_unlock(phil -> rightfork);
-	return (0);
+	else
+		usleep_(phil->timetoeat, phil);
+	pthread_mutex_unlock(phil->leftfork);
+	pthread_mutex_unlock(phil->rightfork);
+	return (ret);
 }
 
 int	startsleeping(t_phil *phil)
 {
 	show(phil, "is sleeping");
-	usleep(phil -> timetosleep * 1000);
+	usleep_(phil->timetosleep, phil);
 	show(phil, "is thinking");
 	return (0);
 }
@@ -100,26 +99,32 @@ void	*routine(void *arg)
 {
 	t_phil	*phil;
 
-	
 	phil = (t_phil *)arg;
 	while (1)
 	{
-		if(takefork(phil))
-			break ;
-		if (starteating(phil))
-			break ;
-		if (startsleeping(phil))
+		takefork(phil);
+		starteating(phil);
+		startsleeping(phil);
+		if (is_dead(phil))
 			break ;
 	}
-	ft_printf("ok many\n");
+	show(phil, "has quit");
 	return (NULL);
 }
 
 int	main(int ac, char **av)
 {
 	t_all	all;
+	int		i;
 
 	memset(&all, 0, sizeof(t_all));
-	if(init_all(&all, ac, av))
+	if (init_all(&all, ac, av))
 		return (1);
+	i = -1;
+	while (++i < all.nbphils)
+	{
+		pthread_mutex_destroy(&all.m_nbforks[i]);
+		pthread_mutex_destroy(&all.checker[i]);
+		free(&all.phil[i]);
+	}
 }

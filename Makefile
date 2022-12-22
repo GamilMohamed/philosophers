@@ -6,7 +6,7 @@ DIR_SRCS		=	srcs/
 
 DIR_OBJS		=	objs
 
-SRCS_NAMES		=	main.c	init.c	misc.c	fork.c
+SRCS_NAMES		=	main.c	init.c	misc.c	fork.c	time.c
 
 OBJS_NAMES		=	${SRCS_NAMES:.c=.o}
 
@@ -18,7 +18,7 @@ HEAD			=	-Iincludes/ -Ilibft/includes
 
 CC				=	cc
 
-CFLAGS			=	-g3 -Wall -Werror -Wextra
+CFLAGS			=	-g3 -Wall -Werror -Wextra -fsanitize=thread
 
 MAKEFLAGS		=	--no-print-directory
 

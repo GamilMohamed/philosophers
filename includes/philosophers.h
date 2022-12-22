@@ -6,7 +6,7 @@
 /*   By: mgamil <mgamil@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/17 16:21:20 by mgamil            #+#    #+#             */
-/*   Updated: 2022/12/21 05:52:47 by mgamil           ###   ########.fr       */
+/*   Updated: 2022/12/22 00:57:54 by mgamil           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ typedef struct t_all
 	t_phil				*phil;
 	bool				death;
 	int					nbphils;
+	pthread_mutex_t		*checker;
 	pthread_mutex_t		*m_nbforks;
 	int					timetodie;
 	int					timetoeat;
@@ -71,6 +72,7 @@ typedef struct t_phil
 typedef struct t_dead
 {
 	pthread_t			stalker;
+	pthread_mutex_t		protector;
 	t_phil				*phil;
 	t_all				*data;
 
@@ -81,18 +83,22 @@ void					*routine(void *arg);
 int						show(t_phil *phil, char *what);
 long					gettime(void);
 void					*checker(void *arg);
+int						is_dead(t_phil *phil);
 
 /*	MISC.C			*/
 int						ft_threadserror(t_all *all, char *function, int index);
 int						ft_error(t_all *all, char *function, int index,
 							int value);
 char					*color(char *what);
-
 /*	INIT.C			*/
 int						init_all(t_all *all, int ac, char **av);
 /*	FORK.C			*/
 int						takeleft(t_phil *phil);
 int						takeright(t_phil *phil);
 int						takefork(t_phil *phil);
+/*	TIME.C			*/
+long					gettime(void);
+long					convertoms(struct timeval var);
+void					usleep_(long int duration, t_phil *phil);
 
 #endif
