@@ -6,7 +6,7 @@
 /*   By: mgamil <mgamil@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/17 16:21:20 by mgamil            #+#    #+#             */
-/*   Updated: 2022/12/23 01:59:02 by mgamil           ###   ########.fr       */
+/*   Updated: 2022/12/23 05:12:05 by mgamil           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ typedef struct t_all
 	int					timetosleep;
 	int					nbmaxeat;
 	pthread_mutex_t		print;
+	pthread_mutex_t		condition;
 	pthread_mutex_t		shield;
 }						t_all;
 
@@ -92,6 +93,7 @@ int						ft_threadserror(t_all *all, char *function, int index);
 int						ft_error(t_all *all, char *function, int index,
 							int value);
 char					*color(char *what);
+char	*colorint(int n);
 /*	INIT.C			*/
 int						init_all(t_all *all, int ac, char **av);
 /*	FORK.C			*/

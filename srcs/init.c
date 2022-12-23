@@ -6,7 +6,7 @@
 /*   By: mgamil <mgamil@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/18 19:44:30 by mgamil            #+#    #+#             */
-/*   Updated: 2022/12/23 02:20:00 by mgamil           ###   ########.fr       */
+/*   Updated: 2022/12/23 02:42:51 by mgamil           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ static int	init_struct(t_all *all, int ac, char **av)
 	all->timetoeat = ft_atoi(av[3]);
 	all->timetosleep = ft_atoi(av[4]);
 	all->death = 0;
-	all->nbmaxeat = -1;
+	all->nbmaxeat = 2147483647;
 	if (ac > 5)
 		all->nbmaxeat = ft_atoi(av[5]);
 	return (0);
@@ -45,6 +45,8 @@ static int	init_philos(t_all *all)
 		if (pthread_mutex_init(& all->m_nbforks[i], NULL))
 			return (ft_error(all, "init.c (init_philos)", i, 1));
 	if (pthread_mutex_init(&all->shield, NULL))
+		return (ft_error(all, "init.c (init_philos)", -1, 1));
+	if (pthread_mutex_init(&all->condition, NULL))
 		return (ft_error(all, "init.c (init_philos)", -1, 1));
 	/**/
 	if (pthread_mutex_init(&all->deathchecker, NULL))
