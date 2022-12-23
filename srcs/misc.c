@@ -6,7 +6,7 @@
 /*   By: mgamil <mgamil@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/19 01:51:15 by mgamil            #+#    #+#             */
-/*   Updated: 2022/12/23 05:12:30 by mgamil           ###   ########.fr       */
+/*   Updated: 2022/12/23 18:04:32 by mgamil           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,15 +59,19 @@ char	*color(char *what)
 
 char	*colorint(int n)
 {
-	if (n % 10 == 0)
-		return (GREEN);
-	if (n % 2 == 1)
-		return (YELLOW);
-	if (n % 3 == 2)
-		return (MAGENTA);
-	if (n % 5 == 4)
+	if (n % 8 == 0)
+		return (WHITE);
+	else if (n % 7 == 0)
 		return (RED);
-	if (n % 6 == 5)
+	else if (n % 6 == 0)
+		return (GREEN);
+	else if (n % 5 == 0)
+		return (YELLOW);
+	else if (n % 4 == 0)
 		return (BLUE);
+	else if (n % 3 == 0)
+		return (MAGENTA);
+	else if (n % 2 == 0)
+		return (CYAN);
 	return (RESET);
 }

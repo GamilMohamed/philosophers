@@ -6,7 +6,7 @@
 /*   By: mgamil <mgamil@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/18 19:44:30 by mgamil            #+#    #+#             */
-/*   Updated: 2022/12/23 02:42:51 by mgamil           ###   ########.fr       */
+/*   Updated: 2022/12/23 21:59:09 by mgamil           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ static int	init_struct(t_all *all, int ac, char **av)
 	all->death = 0;
 	all->nbmaxeat = 2147483647;
 	if (ac > 5)
-		all->nbmaxeat = ft_atoi(av[5]);
+		all->nbmaxeat = ft_atoi(av[5]) * all->nbphils;
 	return (0);
 }
 
@@ -74,6 +74,8 @@ static int	init_tabstruct(t_all *all)
 		all->phil[i].nbmaxeat = all->nbmaxeat;
 		all->phil[i].leftfork = &all->m_nbforks[i];
 		all->phil[i].index = i;
+		all->phil[i].left = 0;
+		all->phil[i].right = 0;
 		if (i == all->nbphils - 1)
 			all->phil[i].rightfork = &all->m_nbforks[0];
 		else
@@ -93,8 +95,6 @@ static int	init_threads(t_all *all, t_phil *phil)
 	dead.data = all;
 	dead.phil = phil;
 	i = -1;
-	if (pthread_mutex_init(& dead.protector, NULL))
-		return (ft_error(all, "protector (init_threads)", -1, 1));
 	all->global = gettime();
 	if (pthread_create(&dead.stalker, NULL, &checker, &dead) != 0)
 		return (ft_error(all, "stalker (init_threads)", -1, 3));

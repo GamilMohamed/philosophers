@@ -6,7 +6,7 @@
 /*   By: mgamil <mgamil@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/17 16:21:20 by mgamil            #+#    #+#             */
-/*   Updated: 2022/12/23 05:12:05 by mgamil           ###   ########.fr       */
+/*   Updated: 2022/12/23 21:04:10 by mgamil           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,11 +26,14 @@
 # include <sys/wait.h>
 
 # define RESET "\033[0m"
+# define BLACK "\033[0;30m"
 # define RED "\033[0;31m"
 # define GREEN "\033[0;32m"
+# define YELLOW "\033[0;33m"
 # define BLUE "\033[0;34m"
-# define YELLOW "\033[0;93m"
-# define MAGENTA "\033[0;95m"
+# define MAGENTA "\033[0;35m"
+# define CYAN "\033[0;36m"
+# define WHITE "\033[0;37m"
 # define BRED "\033[0;41m"
 # define BGREEN "\033[0;42m"
 # define BBLUE "\033[0;44m"
@@ -68,6 +71,8 @@ typedef struct t_phil
 	int					timetosleep;
 	int					nbmaxeat;
 	int					goinfre;
+	bool				left;
+	bool				right;
 	pthread_mutex_t		*leftfork;
 	pthread_mutex_t		*rightfork;
 }						t_phil;
@@ -75,7 +80,6 @@ typedef struct t_phil
 typedef struct t_dead
 {
 	pthread_t			stalker;
-	pthread_mutex_t		protector;
 	t_phil				*phil;
 	t_all				*data;
 
@@ -93,7 +97,7 @@ int						ft_threadserror(t_all *all, char *function, int index);
 int						ft_error(t_all *all, char *function, int index,
 							int value);
 char					*color(char *what);
-char	*colorint(int n);
+char					*colorint(int n);
 /*	INIT.C			*/
 int						init_all(t_all *all, int ac, char **av);
 /*	FORK.C			*/
@@ -103,6 +107,7 @@ int						takefork(t_phil *phil);
 /*	TIME.C			*/
 long					gettime(void);
 long					convertoms(struct timeval var);
-int					usleep_(long int duration, t_phil *phil);
+int						usleep_2(long int duration, t_phil *phil);
+int						usleep_(long int duration, t_phil *phil);
 
 #endif

@@ -18,7 +18,7 @@ HEAD			=	-Iincludes/ -Ilibft/includes
 
 CC				=	cc
 
-CFLAGS			=	-g3 -Wall -Werror -Wextra -pthread # -fsanitize=thread
+CFLAGS			=	-g3 -Wall -Werror -Wextra -pthread #-fsanitize=thread
 
 MAKEFLAGS		=	--no-print-directory
 

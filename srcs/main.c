@@ -6,7 +6,7 @@
 /*   By: mgamil <mgamil@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/17 16:18:41 by mgamil            #+#    #+#             */
-/*   Updated: 2022/12/23 05:10:46 by mgamil           ###   ########.fr       */
+/*   Updated: 2022/12/23 22:01:35 by mgamil           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,23 +33,35 @@ void	*checker(void *arg)
 				dead->data->death = 1;
 				pthread_mutex_unlock(&dead->data->deathchecker);
 				pthread_mutex_lock(&dead->data->print);
-				printf("%s[%li] %i died%s\n", RED, gettime()
-						- dead->data->global, i + 1, RESET);
+				printf("%s[%li] %s%i%s died%s\n", RED, gettime()
+						- dead->data->global, colorint(i + 1), i + 1, RESET,
+						RESET);
 				pthread_mutex_unlock(&dead->data->print);
 				return (NULL);
 			}
-			else if (dead->data->nbmaxeat == 0)
+			pthread_mutex_lock(&dead->data->condition);
+			if (dead->data->nbmaxeat == 0)
 			{
 				pthread_mutex_lock(&dead->data->deathchecker);
 				dead->data->death = 1;
 				pthread_mutex_unlock(&dead->data->deathchecker);
+				pthread_mutex_unlock(&dead->data->condition);
 				return (NULL);
 			}
+			pthread_mutex_unlock(&dead->data->condition);
 		}
 	}
 	return (NULL);
 }
 
+int	unlock(t_phil *phil)
+{
+	if (phil->left)
+		pthread_mutex_unlock(phil->leftfork);
+	if (phil->right)
+		pthread_mutex_unlock(phil->rightfork);
+	return (1);
+}
 int	is_dead(t_phil *phil)
 {
 	int	death;
@@ -70,9 +82,9 @@ int	show(t_phil *phil, char *what)
 		pthread_mutex_unlock(&phil->data->print);
 		return (1);
 	}
-	printf("[%li] %s%i %s%s%s[%i]\n", gettime()
-			- phil->data->global, colorint(phil->index + 1), phil->index + 1, color(what), what, RESET,
-			phil->data->nbmaxeat);
+	printf("[%li] %s%i %s%s%s\n", gettime() - phil->data->global,
+			colorint(phil->index + 1), phil->index + 1, color(what), what,
+			RESET);
 	pthread_mutex_unlock(&phil->data->print);
 	return (0);
 }
@@ -84,19 +96,18 @@ int	starteating(t_phil *phil)
 		return (1);
 	pthread_mutex_unlock(&phil->data->shield);
 	if (show(phil, "is eating"))
-	{
-		pthread_mutex_unlock(phil->leftfork);
-		pthread_mutex_unlock(phil->rightfork);
 		return (1);
-	}
 	else
 	{
+		phil->goinfre++;
 		pthread_mutex_lock(&phil->data->condition);
 		phil->data->nbmaxeat--;
 		pthread_mutex_unlock(&phil->data->condition);
 		usleep_(phil->timetoeat, phil);
 	}
+	phil -> left = 0;
 	pthread_mutex_unlock(phil->leftfork);
+	phil -> right = 0;
 	pthread_mutex_unlock(phil->rightfork);
 	return (0);
 }
@@ -129,17 +140,16 @@ void	*routine(void *arg)
 			break ;
 		if (startsleeping(phil))
 			break ;
-		// show(phil, "did a loop");
 	}
-	// show(phil, "has quit");
+	unlock(phil);
 	return (NULL);
 }
 
 int	main(int ac, char **av)
 {
 	t_all	all;
-	int		i;
 
+	int		i;
 	memset(&all, 0, sizeof(t_all));
 	if (init_all(&all, ac, av))
 		return (1);

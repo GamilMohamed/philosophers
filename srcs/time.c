@@ -6,7 +6,7 @@
 /*   By: mgamil <mgamil@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/21 23:46:13 by mgamil            #+#    #+#             */
-/*   Updated: 2022/12/23 00:13:45 by mgamil           ###   ########.fr       */
+/*   Updated: 2022/12/23 21:52:07 by mgamil           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ long	convertoms(struct timeval var)
 	return (var.tv_sec * 1000 + var.tv_usec / 1000);
 }
 
-int	usleep_2(long int duration, t_phil *phil)
+int	usleep_(long int duration, t_phil *phil)
 {
 	long int	start;
 	long int	current;
@@ -48,13 +48,13 @@ int	usleep_2(long int duration, t_phil *phil)
 			else
 				usleep((duration - current) / 10);
 			if (is_dead(phil))
-				break ;
+				return (1);
 		}
 	}
 	return (0);
 }
 
-int	usleep_(long int duration, t_phil *phil)
+int	usleep_2(long int duration, t_phil *phil)
 {
 	long	time;
 	(void)phil;
