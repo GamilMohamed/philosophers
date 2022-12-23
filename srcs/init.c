@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   init.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mgamil <mgamil@42.student.fr>              +#+  +:+       +#+        */
+/*   By: mgamil <mgamil@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/18 19:44:30 by mgamil            #+#    #+#             */
-/*   Updated: 2022/12/22 08:41:11 by mgamil           ###   ########.fr       */
+/*   Updated: 2022/12/23 02:20:00 by mgamil           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ static int	init_struct(t_all *all, int ac, char **av)
 	all->timetoeat = ft_atoi(av[3]);
 	all->timetosleep = ft_atoi(av[4]);
 	all->death = 0;
-	all->nbmaxeat = 0;
+	all->nbmaxeat = -1;
 	if (ac > 5)
 		all->nbmaxeat = ft_atoi(av[5]);
 	return (0);
@@ -44,13 +44,12 @@ static int	init_philos(t_all *all)
 	while (++i < all->nbphils)
 		if (pthread_mutex_init(& all->m_nbforks[i], NULL))
 			return (ft_error(all, "init.c (init_philos)", i, 1));
-	all->checker = malloc(sizeof(pthread_mutex_t) * all->nbphils);
-	i = -1;
-	while (++i < all->nbphils)
-		if (pthread_mutex_init(all->checker, NULL))
-			return (ft_error(all, "init.c (init_philos)", -1, 0));
 	if (pthread_mutex_init(&all->shield, NULL))
 		return (ft_error(all, "init.c (init_philos)", -1, 1));
+	/**/
+	if (pthread_mutex_init(&all->deathchecker, NULL))
+		return (ft_error(all, "init.c (init_philos)", -1, 1));
+	/**/
 	return (0);
 }
 
@@ -91,9 +90,6 @@ static int	init_threads(t_all *all, t_phil *phil)
 	memset(&dead, 0, sizeof(t_dead));
 	dead.data = all;
 	dead.phil = phil;
-	i = -1;
-	while (++i < all->nbphils)
-		pthread_mutex_init(&phil->data->checker[i], NULL);
 	i = -1;
 	if (pthread_mutex_init(& dead.protector, NULL))
 		return (ft_error(all, "protector (init_threads)", -1, 1));

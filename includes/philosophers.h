@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philosophers.h                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mgamil <mgamil@42.student.fr>              +#+  +:+       +#+        */
+/*   By: mgamil <mgamil@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/17 16:21:20 by mgamil            #+#    #+#             */
-/*   Updated: 2022/12/22 09:17:08 by mgamil           ###   ########.fr       */
+/*   Updated: 2022/12/23 01:59:02 by mgamil           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ typedef struct t_all
 	bool				death;
 	int					nbphils;
 	pthread_mutex_t		*checker;
+	pthread_mutex_t		deathchecker;
 	pthread_mutex_t		*m_nbforks;
 	int					timetodie;
 	int					timetoeat;
@@ -65,6 +66,7 @@ typedef struct t_phil
 	int					timetoeat;
 	int					timetosleep;
 	int					nbmaxeat;
+	int					goinfre;
 	pthread_mutex_t		*leftfork;
 	pthread_mutex_t		*rightfork;
 }						t_phil;

@@ -6,7 +6,7 @@
 /*   By: mgamil <mgamil@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/19 01:51:15 by mgamil            #+#    #+#             */
-/*   Updated: 2022/12/21 05:34:33 by mgamil           ###   ########.fr       */
+/*   Updated: 2022/12/22 18:03:53 by mgamil           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,5 +52,7 @@ char	*color(char *what)
 		return (MAGENTA);
 	if (ft_strnstr(what, "sleeping", ft_strlen(what)))
 		return (RED);
+	if (ft_strnstr(what, "thinking", ft_strlen(what)))
+		return (BLUE);
 	return (RESET);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mgamil <mgamil@42.student.fr>              +#+  +:+       +#+        */
+/*   By: mgamil <mgamil@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/17 16:18:41 by mgamil            #+#    #+#             */
-/*   Updated: 2022/12/22 09:33:56 by mgamil           ###   ########.fr       */
+/*   Updated: 2022/12/23 02:32:33 by mgamil           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,18 +24,23 @@ void	*checker(void *arg)
 		i = -1;
 		while (++i < dead->data->nbphils)
 		{
-			pthread_mutex_lock(&dead->data->checker[i]);
+			pthread_mutex_lock(&dead->data->shield);
+			if (dead->data->nbmaxeat == 0)
+			{
+				pthread_mutex_unlock(&dead->data->shield);
+				break ;
+			}
 			time = gettime() - convertoms(dead->data->phil[i].var);
-			pthread_mutex_unlock(&dead->data->checker[i]);
+			pthread_mutex_unlock(&dead->data->shield);
 			if (time > dead->data->timetodie)
 			{
-				printf("%s%li %i died%s\n", RED, gettime()
-						- dead->data->global, i + 1, RESET);
-				for (int j = 0; j < dead->data->nbphils; j++)
-					pthread_mutex_lock(&dead->data->checker[j]);
+				pthread_mutex_lock(&dead->data->deathchecker);
 				dead->data->death = 1;
-				for (int j = 0; j < dead->data->nbphils; j++)
-					pthread_mutex_unlock(&dead->data->checker[j]);
+				pthread_mutex_unlock(&dead->data->deathchecker);
+				pthread_mutex_lock(&dead->data->print);
+				printf("%s%li[%li] %i died%s\n", RED, gettime(), gettime()
+						- dead->data->global, i + 1, RESET);
+				pthread_mutex_unlock(&dead->data->print);
 				return (NULL);
 			}
 		}
@@ -45,13 +50,13 @@ void	*checker(void *arg)
 
 int	is_dead(t_phil *phil)
 {
-	pthread_mutex_lock(&phil->data->checker[phil->index]);
-	if (phil->data->death)
-	{
-		pthread_mutex_unlock(&phil->data->checker[phil->index]);
+	int	death;
+
+	pthread_mutex_lock(&phil->data->deathchecker);
+	death = phil->data->death;
+	pthread_mutex_unlock(&phil->data->deathchecker);
+	if (death)
 		return (1);
-	}
-	pthread_mutex_unlock(&phil->data->checker[phil->index]);
 	return (0);
 }
 
@@ -60,38 +65,37 @@ int	show(t_phil *phil, char *what)
 	pthread_mutex_lock(&phil->data->print);
 	if (is_dead(phil))
 	{
-		// printf("[%li] Phil[%i] FAILED while ->%s<- \n", gettime() - phil->data->global,
-				// phil->index + 1, what);
 		pthread_mutex_unlock(&phil->data->print);
 		return (1);
 	}
-	printf("%li %i %s%s%s\n", gettime() - phil->data->global,
-			phil->index + 1, color(what), what, RESET);
+	printf("%li[%li] %i %s%s%s[%i]\n", gettime(), gettime() - phil->data->global,
+			phil->index + 1, color(what), what, RESET, phil->data->nbmaxeat);
 	pthread_mutex_unlock(&phil->data->print);
 	return (0);
 }
 
 int	starteating(t_phil *phil)
 {
-	int	ret;
-
-	ret = 0;
 	pthread_mutex_lock(&phil->data->shield);
 	if (gettimeofday(&phil->var, NULL))
 		return (1);
 	pthread_mutex_unlock(&phil->data->shield);
 	if (show(phil, "is eating"))
+	{
+		pthread_mutex_unlock(phil->leftfork);
+		pthread_mutex_unlock(phil->rightfork);
 		return (1);
+	}
 	else
 		usleep_(phil->timetoeat, phil);
 	pthread_mutex_unlock(phil->leftfork);
 	pthread_mutex_unlock(phil->rightfork);
-	return (ret);
+	return (0);
 }
 
 int	startsleeping(t_phil *phil)
 {
-	if (show(phil, "is startsleeping"))
+	if (show(phil, "is sleeping"))
 		return (1);
 	if (usleep_(phil->timetosleep, phil))
 		return (1);
@@ -109,8 +113,8 @@ void	*routine(void *arg)
 		usleep_(phil->timetoeat / 10, phil);
 	while (1)
 	{
-		if (is_dead(phil))
-			break ;
+		if (phil -> goinfre && phil->data->nbphils % 2)
+			usleep_(phil -> timetodie * 0.3, phil);			
 		if (takefork(phil))
 			break ;
 		if (starteating(phil))
@@ -133,9 +137,7 @@ int	main(int ac, char **av)
 		return (1);
 	i = -1;
 	while (++i < all.nbphils)
-	{
 		pthread_mutex_destroy(&all.m_nbforks[i]);
-		pthread_mutex_destroy(&all.checker[i]);
-		free(&all.phil[i]);
-	}
+	free(all.m_nbforks);
+	free(all.phil);
 }
