@@ -6,7 +6,7 @@
 /*   By: mgamil <mgamil@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/19 01:51:15 by mgamil            #+#    #+#             */
-/*   Updated: 2022/12/23 18:04:32 by mgamil           ###   ########.fr       */
+/*   Updated: 2022/12/24 02:09:02 by mgamil           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ int	ft_error(t_all *all, char *function, int index, int value)
 	int	i;
 
 	i = -1;
-	ft_printf("failed in:%s\n", function);
+	printf("failed in:%s\n", function);
 	if (index == -1)
 		index = all->nbphils;
 	while (++i < index)

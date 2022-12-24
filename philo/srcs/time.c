@@ -6,7 +6,7 @@
 /*   By: mgamil <mgamil@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/21 23:46:13 by mgamil            #+#    #+#             */
-/*   Updated: 2022/12/23 21:52:07 by mgamil           ###   ########.fr       */
+/*   Updated: 2022/12/24 02:01:51 by mgamil           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ int	usleep_(long int duration, t_phil *phil)
 int	usleep_2(long int duration, t_phil *phil)
 {
 	long	time;
+
 	(void)phil;
 	time = gettime();
 	while (gettime() - time <= duration)

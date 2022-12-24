@@ -6,19 +6,19 @@
 /*   By: mgamil <mgamil@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/17 16:21:20 by mgamil            #+#    #+#             */
-/*   Updated: 2022/12/23 21:04:10 by mgamil           ###   ########.fr       */
+/*   Updated: 2022/12/24 02:11:29 by mgamil           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILOSOPHERS_H
 # define PHILOSOPHERS_H
 
-# include "get_next_line.h"
-# include "libft.h"
 # include <limits.h>
 # include <pthread.h>
 # include <stdbool.h>
 # include <stdio.h>
+# include <stdlib.h>
+# include <unistd.h>
 # include <string.h>
 # include <sys/stat.h>
 # include <sys/time.h>
@@ -34,11 +34,6 @@
 # define MAGENTA "\033[0;35m"
 # define CYAN "\033[0;36m"
 # define WHITE "\033[0;37m"
-# define BRED "\033[0;41m"
-# define BGREEN "\033[0;42m"
-# define BBLUE "\033[0;44m"
-# define BYELLOW "\033[0;103m"
-# define BMAGENTA "\033[0;105m"
 
 typedef struct t_phil	t_phil;
 
@@ -109,5 +104,16 @@ long					gettime(void);
 long					convertoms(struct timeval var);
 int						usleep_2(long int duration, t_phil *phil);
 int						usleep_(long int duration, t_phil *phil);
+/*	ACTIONS.C		*/
+int						starteating(t_phil *phil);
+int						startsleeping(t_phil *phil);
+/*	DEATH.C			*/
+void					*checker(void *arg);
+int						is_dead(t_phil *phil);
+/*	MY_LIB.C		*/
+char					*ft_strnstr(char const *haystack, char const *needle,
+							size_t len);
+size_t					ft_strlen(const char *str);
+int						ft_atoi(const char *str);
 
 #endif
